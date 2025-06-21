@@ -1,0 +1,11 @@
+# Node modules
+node_modules/
+
+# Parcel output folders
+dist/
+.parcel-cache/
+.cache/
+
+# Other
+.env
+.DS_Store
