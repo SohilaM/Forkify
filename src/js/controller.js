@@ -3,6 +3,7 @@ import recipeView from './views/recipeView.js';
 import searchView from './views/searchView.js';
 import resultsView from './views/resultsView.js';
 import paginationView from './views/paginationView.js';
+import bookmarksView from './views/bookmarksView.js';
 
 import 'core-js/stable'; // Polyfilling everthing else
 import 'regenerator-runtime/runtime'; // Polyfilling async/await
@@ -21,12 +22,16 @@ const controlRecipes = async function () {
     // Update results view to mark selected search results
     resultsView.update(model.getSearchResultsPage());
 
+    // Updating bookmarks view
+    bookmarksView.update(model.state.bookmarks);
+
     // Loading Recipe
     await model.loadRecipe(id);
 
     // Rendering Recipe
     recipeView.render(model.state.recipe);
   } catch (error) {
+    console.error(error);
     recipeView.renderError();
   }
 };
@@ -37,7 +42,6 @@ const controlSearchResults = async function () {
 
     // get search query
     const query = searchView.getQuery();
-    console.log(query);
     if (!query) return;
 
     // load search results
@@ -71,10 +75,33 @@ const controlServings = function (newServings) {
   recipeView.update(model.state.recipe);
 };
 
+const controlAddBookmark = function () {
+  // Add/Remove bookmark
+  if (!model.state.recipe.bookmarked) model.addBookmark(model.state.recipe);
+  else model.deleteBookmark(model.state.recipe.id);
+
+  // Update recioe view
+  recipeView.update(model.state.recipe);
+
+  // Render bookmarks
+  bookmarksView.render(model.state.bookmarks);
+};
+
+const controlBookmarks = function () {
+  bookmarksView.render(model.state.bookmarks);
+};
+
 const init = function () {
+  bookmarksView.addHandlerRender(controlBookmarks);
   recipeView.addHandlerRender(controlRecipes);
   recipeView.addHandlerUpdateServings(controlServings);
+  recipeView.addHandlerAddBookmark(controlAddBookmark);
   searchView.addHandlerSearch(controlSearchResults);
   paginationView.addHandlerClick(controlPagination);
 };
 init();
+
+const clearBookmarks = function () {
+  localStorage.clear('bookmarks');
+};
+// clearBookmarks()
